@@ -2,6 +2,15 @@ load "node.rb"
 class Net
   attr_accessor :input, :output, :hidden
   
+  def self.test
+    n = Net.new 2,1,3,2
+    puts n
+    n.new_inputs [1,1]
+    puts n
+    puts n.tick
+    n
+  end
+  
   def initialize input_count=2, hidden_depth=1, hidden_width=2, output_count=2
     @input = []
     input_count.times do |i|
@@ -59,10 +68,8 @@ class Net
   def tick(times = 1)
     times.times do |count|
       hidden.flatten.each {|h| h.clear_value!}
-      (input+hidden+output).flatten.each do |i|
-        i.links_out.each do |node|
-          i.fire_at node
-        end
+      (hidden+output).flatten.each do |i|
+        i.fire
       end
     end
     self

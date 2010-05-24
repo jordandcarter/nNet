@@ -1,26 +1,33 @@
+load "link.rb"
 class Node
-  attr_accessor :links_in, :links_out, :weight, :type, :value
+  attr_accessor :links_in, :links_out, :type, :value, :threshold
   
-  def initialize(t, v = 0)
+  def initialize(t, v = 0.0, thres = 0.5)
     @links_in = []
     @links_out = []
-    @weight = rand
     @value = v
     @type = t
+    @threshold = thres
   end
   
   def link_to node
-    @links_out << node
-    node.links_in << self
+    link = Link.new(node, self, rand)
+    @links_out << link
+    node.links_in << link
+  end
+  
+  def fire
+    sum = links_in.inject(0){|sum, link| sum + link.link_from.value * link.weight}
+    @value = sigmoid(sum - threshold)
+    puts "#{value} = sigmoid(#{sum} - #{threshold}"
+  end
+  
+  def sigmoid v
+    1.0/(1.0+Math.exp(-v))
   end
   
   def to_s
-    sprintf("#{@type}:%.2f", hidden? ? weight : value)
-  end
-  
-  def fire_at node
-    node.value = node.value + self.value * (node.hidden? ? node.weight : 1)
-    puts "#{node.value} = #{self.value} * #{(node.hidden? ? node.weight : 1)}"
+    ([sprintf("#{@type}:%.2f", value)]+links_in.collect{|i| sprintf("%.2f", i.weight)}).join("|")
   end
   
   def hidden?
